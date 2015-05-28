@@ -1,5 +1,5 @@
 {
-    "name": "JuhaszAdam/graph-generator",
+    "name": "juhasz-adam/graph-generator",
     "type": "library",
     "description": "Graph Generator",
     "keywords": ["graph", "generator", "php", "graphviz"],
