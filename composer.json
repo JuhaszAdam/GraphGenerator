@@ -1,0 +1,32 @@
+{
+    "name": "JuhaszAdam/graph-generator",
+    "type": "library",
+    "description": "Graph Generator",
+    "keywords": ["graph", "generator", "php", "graphviz"],
+    "homepage": "https://github.com/JuhaszAdam/GraphGenerator",
+    "license": "MIT",
+
+    "authors": [
+        {
+            "name": "Juhász Ádám",
+            "email": "juhaszadam34@gmail.com"
+        }
+    ],
+
+    "require": {
+        "php": ">=5.5",
+        "clue/graph": "~0.9.0",
+        "graphp/graphviz": "~0.2.0",
+        "symfony/symfony": "2.6.*"
+    },
+
+    "require-dev": {
+        "phpunit/phpunit": "~4.6"
+    },
+
+    "autoload": {
+        "psr-0": {
+            "Shepard\\GeneratorBundle": ""
+        }
+    }
+}
