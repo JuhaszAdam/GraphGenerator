@@ -10,7 +10,7 @@
 
     <testsuites>
         <testsuite>
-            <directory>./tests/Shepard/</directory>
+            <directory>./tests/</directory>
         </testsuite>
     </testsuites>
 

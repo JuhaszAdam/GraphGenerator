@@ -1,6 +1,6 @@
 <?php
 
-namespace Shepard\Test\Entity;
+namespace Shepard\Tests\Entity;
 
 use Shepard\Entity\EntityInterface;
 
