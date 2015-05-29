@@ -35,12 +35,12 @@ class SVGGenerator
     /**
      * @var string
      */
-    private $fileContentDot = "";
+    private $fileContent = "";
 
     /**
      * @var string
      */
-    private $fileContentEdgesDot = "";
+    private $fileContentEdges = "";
 
     /**
      * @param array|null $graphStyle
@@ -99,21 +99,21 @@ class SVGGenerator
      */
     private function generateSvgFile($entity, $savePath, $saveName)
     {
-        $this->fileContentDot = "digraph my_graph {" . PHP_EOL;
-        $this->fileContentEdgesDot = "";
+        $this->fileContent = "digraph my_graph {" . PHP_EOL;
+        $this->fileContentEdges = "";
 
         $graphConfig = '';
         foreach ($this->graphStyle as $style) {
             $graphConfig .= $style . ";" . PHP_EOL;
         }
-        $this->fileContentDot .= ($graphConfig);
+        $this->fileContent .= ($graphConfig);
 
         $currentNode = 'node [ label = "' . $entity->getLabel1() . '|' . $entity->getLabel3() . '"';
         foreach ($this->nodeStyle as $style) {
             $currentNode .= ", " . $style;
         }
         $currentNode .= ' ] ' . $entity->getId() . ';' . PHP_EOL;
-        $this->fileContentDot .= ($currentNode);
+        $this->fileContent .= ($currentNode);
 
         foreach ($entity->getNodes() as $entityNode) {
             if ($entityNode !== null) {
@@ -125,20 +125,20 @@ class SVGGenerator
                     $currentNode .= ", " . $style;
                 }
                 $currentNode .= ' ] ' . $entityNode->getId() . ';' . PHP_EOL;
-                $this->fileContentDot .= ($currentNode);
+                $this->fileContent .= ($currentNode);
 
-                $this->fileContentEdgesDot .= $entity->getId() . ' -> ' . $entityNode->getId() . '[ ';
+                $this->fileContentEdges .= $entity->getId() . ' -> ' . $entityNode->getId() . '[ ';
                 foreach ($this->edgeStyle as $style) {
-                    $this->fileContentEdgesDot .= $style . ' , ';
+                    $this->fileContentEdges .= $style . ' , ';
                 }
-                $this->fileContentEdgesDot .= ']; ' . PHP_EOL;
+                $this->fileContentEdges .= ']; ' . PHP_EOL;
             }
         }
 
-        $this->fileContentDot .= $this->fileContentEdgesDot . '}';
+        $this->fileContent .= $this->fileContentEdges . '}';
 
         $gvFile = fopen($savePath . $saveName . '.gv', "w");
-        fwrite($gvFile, $this->fileContentDot);
+        fwrite($gvFile, $this->fileContent);
         fclose($gvFile);
 
         (new Process("circo " . $savePath . $saveName . ".gv -Tsvg -o "
