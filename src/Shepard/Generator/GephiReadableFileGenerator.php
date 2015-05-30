@@ -4,7 +4,7 @@ namespace Shepard\Generator;
 
 use Shepard\Entity\EntityInterface;
 
-class GephiReadableFileGenerator
+class GephiReadableFileGenerator extends AbstractGenerator
 {
     /**
      * @var string
@@ -29,9 +29,8 @@ class GephiReadableFileGenerator
     /**
      * @param EntityInterface $entity
      * @param string          $savePath
-     * @returns bool
      */
-    public function draw($entity, $savePath = "graph.gexf")
+    public function draw(EntityInterface $entity, $savePath = "graph.gexf")
     {
         $this->fileContent = '<?' . 'xml version="1.0" encoding="UTF-8"?>
         <gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">
@@ -42,33 +41,21 @@ class GephiReadableFileGenerator
         <graph mode="static" defaultedgetype="directed">
         <nodes>' . PHP_EOL;
 
-        $this->setUpGraph($entity);
-
-        $gvFile = fopen($savePath, "w");
-        fwrite($gvFile, $this->fileContent);
-        fclose($gvFile);
-
-        return true;
-    }
-
-    /**
-     * @param EntityInterface $entity
-     */
-    public function setUpGraph($entity)
-    {
         $this->fileContent .= '<node id="' . $this->nodeId++ . '" label="' . $entity->getLabel1()
             . PHP_EOL . $entity->getLabel3() . '" />' . PHP_EOL;
 
-        $this->checkNodes($entity);
+        $this->buildNodes($entity);
 
         $this->fileContent .= '</nodes>' . PHP_EOL . '<edges>' . PHP_EOL
             . $this->fileContentEdges . PHP_EOL . '</edges></graph></gexf>';
+
+        $this->storage->store($savePath, $this->fileContent);
     }
 
     /**
      * @param EntityInterface $entity
      */
-    private function checkNodes($entity)
+    private function buildNodes(EntityInterface $entity)
     {
         $nodes = $entity->getNodes();
         foreach ($nodes as $entityNode) {
@@ -79,7 +66,7 @@ class GephiReadableFileGenerator
                 $this->fileContentEdges .= '<edge id="' . $this->edgeId++ . '" source="'
                     . $entity->getId() . '" target="' . $entityNode->getId() . '" />' . PHP_EOL;
 
-                $this->checkNodes($entityNode);
+                $this->buildNodes($entityNode);
             }
         }
     }

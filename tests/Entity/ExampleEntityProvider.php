@@ -31,6 +31,37 @@ class ExampleEntityProvider
      */
     public static function generate($count, $minimumNodeCount = 3, $maximumNodeCount = 3)
     {
+        /** @var ExampleEntity[] $entityList */
+        $entityList = [];
+        $nodes = [];
+        array_push($entityList, new ExampleEntity(0, self::getName(0), "06-30-123-4567", "foo@bar.com"));
+
+        $numberOfChildNodes = rand($minimumNodeCount, $maximumNodeCount);
+        $currentEntityId = 0;
+
+        for ($i = 1; $i < $count; $i++) {
+            $user = new ExampleEntity($i, self::getName($i), "06-30-123-4567", "foo@bar.com");
+            array_push($entityList, $user);
+            array_push($nodes, $user);
+
+            if (sizeof($entityList) % $numberOfChildNodes == 1) {
+                $entityList[$currentEntityId]->setNodes($nodes);
+                unset($nodes);
+                $nodes = [];
+                $numberOfChildNodes = rand($minimumNodeCount, $maximumNodeCount);
+                $currentEntityId++;
+            }
+        }
+
+        return $entityList;
+    }
+
+    /**
+     * @param int $i
+     * @return string
+     */
+    private static function getName($i)
+    {
         $nameList = ["Carlotta Paynter", "Stacee Whelpley", "Delisa Aller", "Maren Coogan", "Iris Sesco",
             "Michele Holzinger", "Jazmine Sater", "Isidro Wieczorek", "Rogelio Marron", "Julio Tedeschi", "Leanne Postma",
             "Carol Woody", "Flora Commons", "Lavonne Hartwig", "Milagro Whidden", "Nathaniel Bechtel", "Fernanda Ballow",
@@ -41,25 +72,6 @@ class ExampleEntityProvider
             "Santo Curtin", "Francesco Stuber", "Kaycee Garlock", "Kena Lee", "Tommye Mccorvey", "Fiona Deitz",
             "Jaquelyn Ingerson", "Gertie Shawn", "Angelika Tobia"];
 
-        /** @var ExampleEntity[] $userList */
-        $userList = [];
-        $nodes = [];
-        array_push($userList, new ExampleEntity(0, $nameList[0], "06-30-123-4567", "foo@bar.com"));
-        $randomNumber = rand($minimumNodeCount, $maximumNodeCount);
-        $j = 0;
-        for ($i = 1; $i < $count; $i++) {
-            $user = new ExampleEntity($i, $nameList[$i % 50], "06-30-123-4567", "foo@bar.com");
-            array_push($userList, $user);
-            array_push($nodes, $user);
-            if (sizeof($userList) % $randomNumber == 1) {
-                $userList[$j]->setNodes($nodes);
-                unset($nodes);
-                $nodes = [];
-                $randomNumber = rand($minimumNodeCount, $maximumNodeCount);
-                $j++;
-            }
-        }
-
-        return $userList;
+        return $nameList[$i % count($nameList)];
     }
 }

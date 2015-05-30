@@ -28,10 +28,10 @@ class ExampleEntity implements EntityInterface
     private $nodes;
 
     /**
-     * @param int $id
-     * @param string $label1
-     * @param string $label2
-     * @param string $label3
+     * @param int             $id
+     * @param string          $label1
+     * @param string          $label2
+     * @param string          $label3
      * @param ExampleEntity[] $nodes
      */
     public function __construct($id = -1,
@@ -48,7 +48,7 @@ class ExampleEntity implements EntityInterface
     }
 
     /**
-     * @return int
+     * @inheritdoc
      */
     public function getId()
     {
@@ -64,7 +64,7 @@ class ExampleEntity implements EntityInterface
     }
 
     /**
-     * @return string
+     * @inheritdoc
      */
     public function getLabel1()
     {
@@ -80,7 +80,7 @@ class ExampleEntity implements EntityInterface
     }
 
     /**
-     * @return string
+     * @inheritdoc
      */
     public function getLabel2()
     {
@@ -96,7 +96,7 @@ class ExampleEntity implements EntityInterface
     }
 
     /**
-     * @return string
+     * @inheritdoc
      */
     public function getLabel3()
     {
@@ -112,7 +112,7 @@ class ExampleEntity implements EntityInterface
     }
 
     /**
-     * @return ExampleEntity[]
+     * @inheritdoc
      */
     public function getNodes()
     {
@@ -122,7 +122,7 @@ class ExampleEntity implements EntityInterface
     /**
      * @param ExampleEntity[] $nodes
      */
-    public function setNodes($nodes)
+    public function setNodes(array $nodes)
     {
         $this->nodes = $nodes;
     }
