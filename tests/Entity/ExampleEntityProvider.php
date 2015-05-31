@@ -18,7 +18,7 @@ class ExampleEntityProvider
         $userList[0]->setNodes([$userList[1], $userList[2], $userList[3]]);
         $userList[1]->setNodes([$userList[4], $userList[5]]);
         $userList[2]->setNodes([$userList[6], $userList[7], $userList[8]]);
-        $userList[3]->setNodes([$userList[9]]);
+        $userList[7]->setNodes([$userList[9]]);
 
         return $userList;
     }

@@ -5,6 +5,11 @@ namespace Shepard\Style;
 class Style
 {
     /**
+     * @var string
+     */
+    private $graphType;
+
+    /**
      * @var array
      */
     private $graphStyle = [
@@ -27,22 +32,45 @@ class Style
     /**
      * @var array
      */
+    private $activeNodeStyle = [
+        "shape = record",
+        "penwidth = 2.0",
+        "color = Blue",
+        "style = filled",
+        "fillcolor = white"
+    ];
+
+    /**
+     * @var array
+     */
     private $edgeStyle = [];
 
     /**
+     * @param string     $graphType
      * @param array|null $graphStyle
      * @param array|null $nodeStyle
+     * @param array|null $activeNodeStyle
      * @param array|null $edgeStyle
      */
-    public function __construct(array $graphStyle = null, array $nodeStyle = null, array $edgeStyle = null)
+    public function __construct(
+        $graphType,
+        array $graphStyle = null,
+        array $nodeStyle = null,
+        array $activeNodeStyle = null,
+        array $edgeStyle = null
+    )
     {
-        if ($graphStyle !== null) {
+        $this->graphType = $graphType;
+        if ($graphStyle) {
             $this->graphStyle = $graphStyle;
         }
-        if ($nodeStyle !== null) {
+        if ($nodeStyle) {
             $this->nodeStyle = $nodeStyle;
         }
-        if ($edgeStyle !== null) {
+        if ($activeNodeStyle) {
+            $this->activeNodeStyle = $activeNodeStyle;
+        }
+        if ($edgeStyle) {
             $this->edgeStyle = $edgeStyle;
         }
     }
@@ -56,27 +84,11 @@ class Style
     }
 
     /**
-     * @param array $graphStyle
-     */
-    public function setGraphStyle(array $graphStyle)
-    {
-        $this->graphStyle = $graphStyle;
-    }
-
-    /**
      * @return array
      */
     public function getNodeStyle()
     {
         return $this->nodeStyle;
-    }
-
-    /**
-     * @param array $nodeStyle
-     */
-    public function setNodeStyle(array $nodeStyle)
-    {
-        $this->nodeStyle = $nodeStyle;
     }
 
     /**
@@ -88,10 +100,18 @@ class Style
     }
 
     /**
-     * @param array $edgeStyle
+     * @return string
      */
-    public function setEdgeStyle(array $edgeStyle)
+    public function getGraphType()
     {
-        $this->edgeStyle = $edgeStyle;
+        return $this->graphType;
+    }
+
+    /**
+     * @return array
+     */
+    public function getActiveNodeStyle()
+    {
+        return $this->activeNodeStyle;
     }
 }

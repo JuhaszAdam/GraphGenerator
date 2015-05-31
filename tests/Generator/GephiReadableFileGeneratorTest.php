@@ -11,7 +11,7 @@ class GephiReadableFileGeneratorTest extends \PHPUnit_Framework_TestCase
 {
     public function testDrawGexf()
     {
-        $generator = new GephiReadableFileGenerator(new ExampleStorage(), new Style());
+        $generator = new GephiReadableFileGenerator(new ExampleStorage(), new Style("circo"));
         $userList = ExampleEntityProvider::generate(10000, 3, 100);
         $generator->draw($userList[0], "tests/drawTests/test_gexf/graph.gexf");
 

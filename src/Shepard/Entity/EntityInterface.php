@@ -5,7 +5,7 @@ namespace Shepard\Entity;
 interface EntityInterface
 {
     /**
-     * @return string/int
+     * @return string|int
      */
     public function getId();
 

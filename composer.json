@@ -18,8 +18,8 @@
   ],
   "require": {
     "php": ">=5.5",
-    "graphp/graphviz": "~0.2.0",
-    "symfony/process": "dev-master"
+    "symfony/process": "dev-master",
+    "aws/aws-sdk-php": "2.*"
   },
   "require-dev": {
     "phpunit/phpunit": "~4.6"

@@ -4,15 +4,15 @@ namespace Shepard\Tests\Generator;
 
 use Doctrine\Instantiator\Exception\InvalidArgumentException;
 use Shepard\Generator\PDFGenerator;
+use Shepard\Storage\LocalStorage;
 use Shepard\Style\Style;
 use Shepard\Tests\Entity\ExampleEntityProvider;
-use Shepard\Tests\Storage\ExampleStorage;
 
 class PDFGeneratorTest extends \PHPUnit_Framework_TestCase
 {
     public function testDrawPdf()
     {
-        $generator = new PDFGenerator(new ExampleStorage(), new Style());
+        $generator = new PDFGenerator(new LocalStorage(), new Style("circo"));
         $userList = ExampleEntityProvider::generate(150, 3, 5);
         $generator->draw($userList, "tests/drawTests/test_pdf/g");
 
@@ -24,20 +24,22 @@ class PDFGeneratorTest extends \PHPUnit_Framework_TestCase
      */
     public function testDrawTooManyEntities()
     {
-        $generator = new PDFGenerator(new ExampleStorage(), new Style());
+        $generator = new PDFGenerator(new LocalStorage(), new Style("circo"));
         $userList = ExampleEntityProvider::generate(500, 3, 5);
+
         $generator->draw($userList, "tests/drawTests/test_pdf/g");
 
         $this->assertTrue(true);
     }
 
-    public function testConstructor()
+    public function testStyle()
     {
         $generator = new PDFGenerator(
-            new ExampleStorage(),
+            new LocalStorage(),
             new Style(
+                "circo",
                 [
-                    'rankdir=LR',
+                    'rankdir=TB',
                     'size="8,5"',
                     'bgcolor="gray"'
                 ],
@@ -54,7 +56,7 @@ class PDFGeneratorTest extends \PHPUnit_Framework_TestCase
             )
         );
 
-        $userList = ExampleEntityProvider::generate(20, 3, 5);
+        $userList = ExampleEntityProvider::getFixedUserList();
         $generator->draw($userList, "tests/drawTests/test_pdf/g2");
 
         $this->assertTrue(true);
