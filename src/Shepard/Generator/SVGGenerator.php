@@ -9,27 +9,24 @@ class SVGGenerator extends AbstractGenerator
 {
     /**
      * @param EntityInterface $entity
-     * @param string          $filePath
      * @param string          $fileName
+     * @param int             $level
      */
-    public function draw(EntityInterface $entity, $filePath = "graph/", $fileName = "id")
-    {
-        $this->buildNodes($entity, $filePath, $fileName);
-    }
-
-    /**
-     * @param EntityInterface $entity
-     * @param string          $filePath
-     * @param string          $fileName
-     */
-    private function buildNodes(EntityInterface $entity, $filePath, $fileName)
+    public function draw(EntityInterface $entity, $fileName = "id", $level = 0)
     {
         if (!empty($entity->getNodes())) {
-            $this->generateSvgFile($entity, $filePath, $fileName);
+            $this->generateSvgFile($entity, $fileName, $level);
+
+            $level++;
+            foreach ($entity->getNodes() as $entityNode) {
+                if ($entityNode !== null && !empty($entityNode->getNodes())) {
+                    $this->generateSvgFile($entityNode, $fileName, $level);
+                }
+            }
 
             foreach ($entity->getNodes() as $entityNode) {
                 if ($entityNode !== null) {
-                    $this->buildNodes($entityNode, $filePath, $fileName);
+                    $this->draw($entityNode, $fileName, $level);
                 }
             }
         }
@@ -37,10 +34,10 @@ class SVGGenerator extends AbstractGenerator
 
     /**
      * @param EntityInterface $entity
-     * @param string          $filePath
      * @param string          $fileName
+     * @param int             $level
      */
-    private function generateSvgFile(EntityInterface $entity, $filePath, $fileName)
+    private function generateSvgFile(EntityInterface $entity, $fileName, $level)
     {
         $fileContent = "digraph my_graph {" . PHP_EOL;
         $fileContentEdges = "";
@@ -49,11 +46,14 @@ class SVGGenerator extends AbstractGenerator
         foreach ($this->style->getGraphStyle() as $style) {
             $graphConfig .= $style . ";" . PHP_EOL;
         }
+        $graphConfig .= 'label = " ' . $entity->getLabel1() . PHP_EOL . 'Level ' . $level . '";';
+
+
         $fileContent .= $graphConfig;
 
-        $currentNode = 'node [ label = "' . $entity->getLabel1() . '|' . $entity->getLabel3() . '"';
+        $currentNode = 'node [ label = "{ {' . $entity->getLabel1() . '}|{' . $entity->getLabel3() . '} }"';
 
-        foreach ($this->style->getNodeStyle() as $style) {
+        foreach ($this->style->getMainNodeStyle() as $style) {
             $currentNode .= ", " . $style;
         }
         $currentNode .= ' , URL="" ';
@@ -63,7 +63,7 @@ class SVGGenerator extends AbstractGenerator
 
         foreach ($entity->getNodes() as $entityNode) {
             if ($entityNode !== null) {
-                $currentNode = 'node [ label = "' . $entityNode->getLabel1() . '|' . $entityNode->getLabel3() . '"';
+                $currentNode = 'node [ label = "{ {' . $entityNode->getLabel1() . '}|{' . $entityNode->getLabel3() . '} }"';
                 if (!(empty($entityNode->getNodes()))) {
                     foreach ($this->style->getActiveNodeStyle() as $style) {
                         $currentNode .= ", " . $style;
@@ -87,22 +87,24 @@ class SVGGenerator extends AbstractGenerator
         }
         $fileContent .= $fileContentEdges . '}';
 
-        $this->store(($filePath . $fileName . $entity->getId()), $fileContent);
+        $this->store(($fileName . $entity->getId()), $fileContent);
     }
 
     /**
-     * @param $filePath
+     * @param $fileName
      * @param $fileContent
      */
-    private function store($filePath, $fileContent)
+    private function store($fileName, $fileContent)
     {
         $tempFile = tmpfile();
         $path = stream_get_meta_data($tempFile)['uri'];
-        fwrite($tempFile, $fileContent);
+        fputs($tempFile, $fileContent);
 
-        (new Process($this->style->getGraphType() . " " . $path . " -Tsvg -o " . $filePath . ".svg"))->run();
+        (new Process($this->style->getGraphType() . " " . $path . " -Tsvg -o " . $fileName . ".svg"))->run();
         fclose($tempFile);
 
-        $this->storage->storeContent($filePath . ".svg", file_get_contents($filePath . ".svg"));
+        $this->storage->storeContent($fileName . ".svg", file_get_contents($fileName . ".svg"));
+
+        (new Process("rm " . $fileName . ".svg"))->run();
     }
 }

@@ -27,9 +27,9 @@ class GephiReadableFileGenerator extends AbstractGenerator
 
     /**
      * @param EntityInterface $entity
-     * @param string          $savePath
+     * @param string          $fileName
      */
-    public function draw(EntityInterface $entity, $savePath = "graph.gexf")
+    public function draw(EntityInterface $entity, $fileName = "graph.gexf")
     {
         $fileContent = $this->header;
         $fileContentEdges = "";
@@ -41,7 +41,7 @@ class GephiReadableFileGenerator extends AbstractGenerator
         $fileContent .= '</nodes>' . PHP_EOL . '<edges>' . PHP_EOL
             . $fileContentEdges . PHP_EOL . '</edges></graph></gexf>';
 
-        $this->storage->storeContent($savePath, $fileContent);
+        $this->store($fileName, $fileContent);
     }
 
     /**
@@ -63,5 +63,18 @@ class GephiReadableFileGenerator extends AbstractGenerator
                 $this->buildNodes($entityNode, $fileContent, $fileContentEdges);
             }
         }
+    }
+
+    /**
+     * @param $fileName
+     * @param $fileContent
+     */
+    private function store($fileName, $fileContent)
+    {
+        $tempFile = tmpfile();
+        $path = stream_get_meta_data($tempFile)['uri'];
+        fwrite($tempFile, $fileContent);
+        $this->storage->storeContent($fileName, file_get_contents($path));
+        fclose($tempFile);
     }
 }

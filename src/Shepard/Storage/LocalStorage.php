@@ -2,6 +2,7 @@
 
 namespace Shepard\Storage;
 
+use Symfony\Component\Process\Process;
 
 class LocalStorage implements StorageInterface
 {
@@ -13,7 +14,7 @@ class LocalStorage implements StorageInterface
     /**
      * @param string $basePath
      */
-    public function __construct($basePath = "tmp/")
+    public function __construct($basePath = "/tmp/")
     {
         $this->basePath = $basePath;
     }
@@ -23,9 +24,13 @@ class LocalStorage implements StorageInterface
      */
     public function storeContent($path, $content)
     {
-      //  $path = $this->basePath . $path;
+        if (!is_dir($this->basePath)) {
+            (new Process(mkdir($this->basePath, 0755, true)))->run();
+        }
+
+        $path = $this->basePath . $path;
         $file = fopen($path, "w");
-        fwrite($file, $content);
+        fputs($file, $content);
         fclose($file);
     }
 }

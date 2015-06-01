@@ -13,9 +13,12 @@ class Style
      * @var array
      */
     private $graphStyle = [
-        'rankdir=LR',
+        'rankdir=TB',
         'size="8,5"',
-        'bgcolor="white"'
+        'bgcolor="white"',
+        'labelloc = "top"',
+        'labeljust = "left"',
+        'fontsize=25'
     ];
 
     /**
@@ -24,7 +27,7 @@ class Style
     private $nodeStyle = [
         "shape = record",
         "penwidth = 2.0",
-        "color = Black",
+        "color = black",
         "style = filled",
         "fillcolor = white"
     ];
@@ -35,7 +38,18 @@ class Style
     private $activeNodeStyle = [
         "shape = record",
         "penwidth = 2.0",
-        "color = Blue",
+        "color = blue",
+        "style = filled",
+        "fillcolor = white"
+    ];
+
+    /**
+     * @var array
+     */
+    private $mainNodeStyle = [
+        "shape = record",
+        "penwidth = 2.0",
+        'color = red',
         "style = filled",
         "fillcolor = white"
     ];
@@ -50,6 +64,7 @@ class Style
      * @param array|null $graphStyle
      * @param array|null $nodeStyle
      * @param array|null $activeNodeStyle
+     * @param array|null $mainNodeStyle
      * @param array|null $edgeStyle
      */
     public function __construct(
@@ -57,6 +72,7 @@ class Style
         array $graphStyle = null,
         array $nodeStyle = null,
         array $activeNodeStyle = null,
+        array $mainNodeStyle = null,
         array $edgeStyle = null
     )
     {
@@ -69,6 +85,9 @@ class Style
         }
         if ($activeNodeStyle) {
             $this->activeNodeStyle = $activeNodeStyle;
+        }
+        if ($mainNodeStyle) {
+            $this->mainNodeStyle = $mainNodeStyle;
         }
         if ($edgeStyle) {
             $this->edgeStyle = $edgeStyle;
@@ -113,5 +132,13 @@ class Style
     public function getActiveNodeStyle()
     {
         return $this->activeNodeStyle;
+    }
+
+    /**
+     * @return array
+     */
+    public function getMainNodeStyle()
+    {
+        return $this->mainNodeStyle;
     }
 }

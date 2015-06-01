@@ -11,9 +11,9 @@ class SVGGeneratorTest extends \PHPUnit_Framework_TestCase
 {
     public function testDrawSvg()
     {
-        $generator = new SVGGenerator(new LocalStorage(), new Style("circo"));
-        $userList = ExampleEntityProvider::generate(200, 3, 15);
-        $generator->draw($userList[0], "tests/drawTests/test_svg/test1/", "id-");
+        $generator = new SVGGenerator(new LocalStorage("/tmp/Shepard/GraphGenerator/Draw Tests/Svg/Test 1/"), new Style("circo"));
+        $userList = ExampleEntityProvider::getFixedUserList();
+        $generator->draw($userList[0], "id-");
 
         $this->assertTrue(true);
     }
@@ -21,22 +21,26 @@ class SVGGeneratorTest extends \PHPUnit_Framework_TestCase
     public function testStyle()
     {
         $generator = new SVGGenerator(
-            new LocalStorage(),
+            new LocalStorage("/tmp/Shepard/GraphGenerator/Draw Tests/Svg/Test 2/"),
             new Style(
                 "fdp",
                 [
-                    'rankdir=LR',
-                    'bgcolor="#454545"',
+                    'rankdir=TB',
+                    'bgcolor="#121212:#343434"',
+                    'gradientangle = 90',
                     'overlap="prism"',
-                    'splines="spline"',
                     'splines=true',
                     'size="20.0,10.0!"',
-                    'ratio="fill"'
+                    'ratio="fill"',
+                    'labelloc = "top"',
+                    'labeljust = "left"',
+                    'fontsize=25',
+                    'fontcolor=white'
                 ],
                 [
                     "shape = record",
                     "penwidth = 2.0",
-                    "color = white",
+                    "color = black",
                     "fontcolor = white",
                     "style = filled",
                     'fillcolor = "#111111:#333333"',
@@ -45,22 +49,30 @@ class SVGGeneratorTest extends \PHPUnit_Framework_TestCase
                 [
                     "shape = record",
                     "penwidth = 2.0",
-                    "color = white",
+                    'color = black',
                     "fontcolor = white",
                     "style = filled",
                     'fillcolor = "#111133:#333355"',
                     'gradientangle = 90'
                 ],
                 [
+                    "shape = record",
+                    "penwidth = 2.0",
+                    'color = white',
+                    'fontcolor = white',
+                    "style = filled",
+                    'fillcolor = "#111111:#333333"',
+                    'gradientangle = 90'
+                ],
+                [
                     'color = "white"',
-                    "len=4.0"
+                    "len=1.0"
                 ]
             )
         );
 
-       // $userList = ExampleEntityProvider::getFixedUserList();
-        $userList = ExampleEntityProvider::generate(2000, 3, 100);
-        $generator->draw($userList[0], "tests/drawTests/test_svg/test2/", "id-");
+        $userList = ExampleEntityProvider::generate(5000, 3, 100);
+        $generator->draw($userList[0], "id-");
 
         $this->assertTrue(true);
     }

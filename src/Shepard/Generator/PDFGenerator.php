@@ -10,11 +10,11 @@ class PDFGenerator extends AbstractGenerator
 {
     /**
      * @param EntityInterface[] $entity
-     * @param string            $filePath
+     * @param string            $fileName
      */
-    public function draw(array $entity, $filePath = "graph/g")
+    public function draw(array $entity, $fileName = "g")
     {
-        if (count($entity) <= 200) {
+        if (count($entity) <= 500) {
             $fileContent = "digraph my_graph{" . PHP_EOL;
             $fileContentEdges = "";
             $graphConfig = '';
@@ -23,7 +23,7 @@ class PDFGenerator extends AbstractGenerator
             }
             $fileContent .= ($graphConfig);
 
-            $currentNode = 'node [ label = "' . $entity[0]->getLabel1() . '|' . $entity[0]->getLabel3() . '"';
+            $currentNode = 'node [ label = "{ {' . $entity[0]->getLabel1() . '}|{' . $entity[0]->getLabel2() . '} }"';
             foreach ($this->style->getNodeStyle() as $style) {
                 $currentNode .= ", " . $style;
             }
@@ -34,11 +34,7 @@ class PDFGenerator extends AbstractGenerator
 
             $fileContent .= $fileContentEdges . '}';
 
-            //   $this->storage->store($filePath . '.gv', $fileContent);
-            //   $this->storage->runCommand("circo " . $filePath . ".gv -Tpdf -o " . $filePath . ".pdf");
-            //   $this->storage->cleanUp($filePath . ".gv");
-
-            $this->store($filePath, $fileContent);
+            $this->store($fileName, $fileContent);
         } else {
             throw new InvalidArgumentException("PDF format cannot handle more than 200 entities . ");
         }
@@ -53,7 +49,7 @@ class PDFGenerator extends AbstractGenerator
     {
         foreach ($entity->getNodes() as $entityNode) {
             if ($entityNode !== null) {
-                $currentNode = 'node [ label = "' . $entityNode->getLabel1() . ' | ' . $entityNode->getLabel3() . '"';
+                $currentNode = 'node [ label = "{ {' . $entityNode->getLabel1() . '}|{' . $entityNode->getLabel2() . '} }"';
                 foreach ($this->style->getNodeStyle() as $style) {
                     $currentNode .= ", " . $style;
                 }
@@ -72,18 +68,20 @@ class PDFGenerator extends AbstractGenerator
     }
 
     /**
-     * @param $filePath
+     * @param $fileName
      * @param $fileContent
      */
-    private function store($filePath, $fileContent)
+    private function store($fileName, $fileContent)
     {
         $tempFile = tmpfile();
         $path = stream_get_meta_data($tempFile)['uri'];
-        fwrite($tempFile, $fileContent);
+        fputs($tempFile, $fileContent);
 
-        (new Process($this->style->getGraphType() . " " . $path . " -Tpdf -o " . $filePath . ".pdf"))->run();
+        (new Process($this->style->getGraphType() . " " . $path . " -Tpdf -o " . $fileName . ".pdf"))->run();
         fclose($tempFile);
 
-        $this->storage->storeContent($filePath . ".pdf", file_get_contents($filePath . ".pdf"));
+        $this->storage->storeContent($fileName . ".pdf", file_get_contents($fileName . ".pdf"));
+
+        (new Process("rm " . $fileName . ".pdf"))->run();
     }
 }
