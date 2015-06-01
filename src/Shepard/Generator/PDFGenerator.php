@@ -2,127 +2,86 @@
 
 namespace Shepard\Generator;
 
+use Doctrine\Instantiator\Exception\InvalidArgumentException;
 use Shepard\Entity\EntityInterface;
 use Symfony\Component\Process\Process;
 
-class PDFGenerator
+class PDFGenerator extends AbstractGenerator
 {
     /**
-     * @var array
-     */
-    private $graphStyle = [
-        'rankdir=LR',
-        'size="8,5"',
-        'bgcolor="white"'
-    ];
-
-    /**
-     * @var array
-     */
-    private $nodeStyle = [
-        "shape = record",
-        "penwidth = 2.0",
-        "color = Black",
-        "style = filled",
-        "fillcolor = white"
-    ];
-
-    /**
-     * @var array
-     */
-    private $edgeStyle = [];
-
-    /**
-     * @var string
-     */
-    private $fileContentDot = "";
-
-    /**
-     * @var string
-     */
-    private $fileContentEdgesDot = "";
-
-    /**
-     * @param array|null $graphStyle
-     * @param array|null $nodeStyle
-     * @param array|null $edgeStyle
-     */
-    public function __construct($graphStyle = null, $nodeStyle = null, $edgeStyle = null)
-    {
-        if ($graphStyle !== null) {
-            $this->graphStyle = $graphStyle;
-        }
-        if ($nodeStyle !== null) {
-            $this->nodeStyle = $nodeStyle;
-        }
-        if ($edgeStyle !== null) {
-            $this->edgeStyle = $edgeStyle;
-        }
-    }
-
-    /**
      * @param EntityInterface[] $entity
-     * @param string            $savePath
-     * @param string            $saveName
-     * @returns bool
+     * @param string            $fileName
      */
-    public function draw(array $entity, $savePath = "graph/", $saveName = "g")
+    public function draw(array $entity, $fileName = "g")
     {
-        if (count($entity) <= 200) {
-            $this->fileContentDot = "digraph my_graph{" . PHP_EOL;
-            $this->fileContentEdgesDot = "";
+        if (count($entity) <= 500) {
+            $fileContent = "digraph my_graph{" . PHP_EOL;
+            $fileContentEdges = "";
             $graphConfig = '';
-            foreach ($this->graphStyle as $style) {
+            foreach ($this->style->getGraphStyle() as $style) {
                 $graphConfig .= $style . ";" . PHP_EOL;
             }
-            $this->fileContentDot .= ($graphConfig);
+            $fileContent .= ($graphConfig);
 
-            $currentNode = 'node [ label = "' . $entity[0]->getLabel1() . '|' . $entity[0]->getLabel3() . '"';
-            foreach ($this->nodeStyle as $style) {
+            $currentNode = 'node [ label = "{ {' . $entity[0]->getLabel1() . '}|{' . $entity[0]->getLabel2() . '} }"';
+            foreach ($this->style->getNodeStyle() as $style) {
                 $currentNode .= ", " . $style;
             }
             $currentNode .= ' ] ' . $entity[0]->getId() . ';' . PHP_EOL;
-            $this->fileContentDot .= ($currentNode);
+            $fileContent .= ($currentNode);
 
-            $this->checkNodes($entity[0], $savePath, $saveName);
+            $this->buildNodes($entity[0], $fileContent, $fileContentEdges);
 
-            $this->fileContentDot .= $this->fileContentEdgesDot . '}';
+            $fileContent .= $fileContentEdges . '}';
 
-            $gvFile = fopen($savePath . $saveName . '.gv', "w");
-            fwrite($gvFile, $this->fileContentDot);
-            fclose($gvFile);
-
-            (new Process("circo " . $savePath . $saveName . ".gv -Tpdf -o " . $savePath . $saveName . ".pdf"))->run();
-            (new Process("rm " . $savePath . $saveName . ".gv"))->run();
-
-            return true;
+            $this->store($fileName, $fileContent);
         } else {
-            return false;
+            throw new InvalidArgumentException("PDF format cannot handle more than 200 entities . ");
         }
     }
 
     /**
      * @param EntityInterface $entity
+     * @param string          $fileContent
+     * @param string          $fileContentEdges
      */
-    private function checkNodes($entity)
+    private function buildNodes(EntityInterface $entity, &$fileContent, &$fileContentEdges)
     {
         foreach ($entity->getNodes() as $entityNode) {
             if ($entityNode !== null) {
-                $currentNode = 'node [ label = "' . $entityNode->getLabel1() . '|' . $entityNode->getLabel3() . '"';
-                foreach ($this->nodeStyle as $style) {
+                $currentNode = 'node [ label = "{ {' . $entityNode->getLabel1() . '}|{' . $entityNode->getLabel2() . '} }"';
+                foreach ($this->style->getNodeStyle() as $style) {
                     $currentNode .= ", " . $style;
                 }
                 $currentNode .= ' ] ' . $entityNode->getId() . ';' . PHP_EOL;
-                $this->fileContentDot .= ($currentNode);
+                $fileContent .= ($currentNode);
 
-                $this->fileContentEdgesDot .= $entity->getId() . ' -> ' . $entityNode->getId() . '[ ';
-                foreach ($this->edgeStyle as $style) {
-                    $this->fileContentEdgesDot .= $style . ' , ';
+                $fileContentEdges .= $entity->getId() . ' -> ' . $entityNode->getId() . '[ ';
+                foreach ($this->style->getEdgeStyle() as $style) {
+                    $fileContentEdges .= $style . ' , ';
                 }
-                $this->fileContentEdgesDot .= 'len="10.0"]; ' . PHP_EOL;
+                $fileContentEdges .= 'len="10.0"]; ' . PHP_EOL;
 
-                $this->checkNodes($entityNode);
+                $this->buildNodes($entityNode, $fileContent, $fileContentEdges);
             }
         }
+    }
+
+    /**
+     * @param $fileName
+     * @param $fileContent
+     */
+    private function store($fileName, $fileContent)
+    {
+        $tempFile = tmpfile();
+        $path = stream_get_meta_data($tempFile)['uri'];
+        fputs($tempFile, $fileContent);
+
+        (new Process($this->style->getGraphType() . " " . $path . " -Tpdf -o " . $fileName . ".pdf"))->run();
+        fclose($tempFile);
+
+        $this->storage->storeContent($fileName . ".pdf", file_get_contents($fileName . ".pdf"));
+
+        (new Process("rm " . $fileName . ".pdf"))->run();
     }
 }

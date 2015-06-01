@@ -5,88 +5,28 @@ namespace Shepard\Generator;
 use Shepard\Entity\EntityInterface;
 use Symfony\Component\Process\Process;
 
-class SVGGenerator
+class SVGGenerator extends AbstractGenerator
 {
     /**
-     * @var array
-     */
-    private $graphStyle = [
-        'rankdir=LR',
-        'size="8,5"',
-        'bgcolor="white"'
-    ];
-
-    /**
-     * @var array
-     */
-    private $nodeStyle = [
-        "shape = record",
-        "penwidth = 2.0",
-        "color = Black",
-        "style = filled",
-        "fillcolor = white"
-    ];
-
-    /**
-     * @var array
-     */
-    private $edgeStyle = [];
-
-    /**
-     * @var string
-     */
-    private $fileContent = "";
-
-    /**
-     * @var string
-     */
-    private $fileContentEdges = "";
-
-    /**
-     * @param array|null $graphStyle
-     * @param array|null $nodeStyle
-     * @param array|null $edgeStyle
-     */
-    public function __construct($graphStyle = null, $nodeStyle = null, $edgeStyle = null)
-    {
-        if ($graphStyle !== null) {
-            $this->graphStyle = $graphStyle;
-        }
-        if ($nodeStyle !== null) {
-            $this->nodeStyle = $nodeStyle;
-        }
-        if ($edgeStyle !== null) {
-            $this->edgeStyle = $edgeStyle;
-        }
-    }
-
-    /**
      * @param EntityInterface $entity
-     * @param string          $savePath
-     * @param string          $saveName
-     * @returns bool
+     * @param string          $fileName
+     * @param int             $level
      */
-    public function draw($entity, $savePath = "graph/", $saveName = "id")
-    {
-        $this->checkNodes($entity, $savePath, $saveName);
-        (new Process("rm " . $savePath . $saveName . ".gv"))->run();
-
-        return true;
-    }
-
-    /**
-     * @param EntityInterface $entity
-     * @param string          $savePath
-     * @param string          $saveName
-     */
-    private function checkNodes($entity, $savePath, $saveName)
+    public function draw(EntityInterface $entity, $fileName = "id", $level = 0)
     {
         if (!empty($entity->getNodes())) {
-            $this->generateSvgFile($entity, $savePath, $saveName);
+            $this->generateSvgFile($entity, $fileName, $level);
+
+            $level++;
+            foreach ($entity->getNodes() as $entityNode) {
+                if ($entityNode !== null && !empty($entityNode->getNodes())) {
+                    $this->generateSvgFile($entityNode, $fileName, $level);
+                }
+            }
 
             foreach ($entity->getNodes() as $entityNode) {
                 if ($entityNode !== null) {
-                    $this->checkNodes($entityNode, $savePath, $saveName);
+                    $this->draw($entityNode, $fileName, $level);
                 }
             }
         }
@@ -94,54 +34,77 @@ class SVGGenerator
 
     /**
      * @param EntityInterface $entity
-     * @param string          $savePath
-     * @param string          $saveName
+     * @param string          $fileName
+     * @param int             $level
      */
-    private function generateSvgFile($entity, $savePath, $saveName)
+    private function generateSvgFile(EntityInterface $entity, $fileName, $level)
     {
-        $this->fileContent = "digraph my_graph {" . PHP_EOL;
-        $this->fileContentEdges = "";
+        $fileContent = "digraph my_graph {" . PHP_EOL;
+        $fileContentEdges = "";
 
         $graphConfig = '';
-        foreach ($this->graphStyle as $style) {
+        foreach ($this->style->getGraphStyle() as $style) {
             $graphConfig .= $style . ";" . PHP_EOL;
         }
-        $this->fileContent .= ($graphConfig);
+        $graphConfig .= 'label = " ' . $entity->getLabel1() . PHP_EOL . 'Level ' . $level . '";';
 
-        $currentNode = 'node [ label = "' . $entity->getLabel1() . '|' . $entity->getLabel3() . '"';
-        foreach ($this->nodeStyle as $style) {
+
+        $fileContent .= $graphConfig;
+
+        $currentNode = 'node [ label = "{ {' . $entity->getLabel1() . '}|{' . $entity->getLabel3() . '} }"';
+
+        foreach ($this->style->getMainNodeStyle() as $style) {
             $currentNode .= ", " . $style;
         }
+        $currentNode .= ' , URL="" ';
+
         $currentNode .= ' ] ' . $entity->getId() . ';' . PHP_EOL;
-        $this->fileContent .= ($currentNode);
+        $fileContent .= $currentNode;
 
         foreach ($entity->getNodes() as $entityNode) {
             if ($entityNode !== null) {
-                $currentNode = 'node [ label = "' . $entityNode->getLabel1() . '|' . $entityNode->getLabel3() . '"';
-                if (!empty($entityNode->getNodes())) {
-                    $currentNode .= ' , URL="' . $saveName . $entityNode->getId() . '.svg" ';
-                }
-                foreach ($this->nodeStyle as $style) {
-                    $currentNode .= ", " . $style;
+                $currentNode = 'node [ label = "{ {' . $entityNode->getLabel1() . '}|{' . $entityNode->getLabel3() . '} }"';
+                if (!(empty($entityNode->getNodes()))) {
+                    foreach ($this->style->getActiveNodeStyle() as $style) {
+                        $currentNode .= ", " . $style;
+                    }
+                    $currentNode .= ' , URL="' . $fileName . $entityNode->getId() . '.svg" ';
+                } else {
+                    foreach ($this->style->getNodeStyle() as $style) {
+                        $currentNode .= ", " . $style;
+                    }
+                    $currentNode .= ' , URL="" ';
                 }
                 $currentNode .= ' ] ' . $entityNode->getId() . ';' . PHP_EOL;
-                $this->fileContent .= ($currentNode);
+                $fileContent .= ($currentNode);
 
-                $this->fileContentEdges .= $entity->getId() . ' -> ' . $entityNode->getId() . '[ ';
-                foreach ($this->edgeStyle as $style) {
-                    $this->fileContentEdges .= $style . ' , ';
+                $fileContentEdges .= $entity->getId() . ' -> ' . $entityNode->getId() . '[ ';
+                foreach ($this->style->getEdgeStyle() as $style) {
+                    $fileContentEdges .= $style . ' , ';
                 }
-                $this->fileContentEdges .= ']; ' . PHP_EOL;
+                $fileContentEdges .= ']; ' . PHP_EOL;
             }
         }
+        $fileContent .= $fileContentEdges . '}';
 
-        $this->fileContent .= $this->fileContentEdges . '}';
+        $this->store(($fileName . $entity->getId()), $fileContent);
+    }
 
-        $gvFile = fopen($savePath . $saveName . '.gv', "w");
-        fwrite($gvFile, $this->fileContent);
-        fclose($gvFile);
+    /**
+     * @param $fileName
+     * @param $fileContent
+     */
+    private function store($fileName, $fileContent)
+    {
+        $tempFile = tmpfile();
+        $path = stream_get_meta_data($tempFile)['uri'];
+        fputs($tempFile, $fileContent);
 
-        (new Process("circo " . $savePath . $saveName . ".gv -Tsvg -o "
-            . $savePath . $saveName . $entity->getId() . ".svg"))->run();
+        (new Process($this->style->getGraphType() . " " . $path . " -Tsvg -o " . $fileName . ".svg"))->run();
+        fclose($tempFile);
+
+        $this->storage->storeContent($fileName . ".svg", file_get_contents($fileName . ".svg"));
+
+        (new Process("rm " . $fileName . ".svg"))->run();
     }
 }
