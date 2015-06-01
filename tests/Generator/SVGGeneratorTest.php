@@ -102,7 +102,7 @@ class SVGGeneratorTest extends \PHPUnit_Framework_TestCase
             $results .= ($i * 100) . " entities: " . $periods[$i - 1]->getDuration() . " ms" . PHP_EOL;
         }
 
-        $file = fopen('tests/stopwatch_results.txt', "w");
+        $file = fopen('tests/stopwatch_svg_circo_results.txt', "w");
         fputs($file, $results);
         fclose($file);
 

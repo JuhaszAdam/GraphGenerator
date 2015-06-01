@@ -24,7 +24,7 @@ class LocalStorage implements StorageInterface
     /**
      * @inheritdoc
      */
-    public function storeContent($path, $content)
+    public function storeContent($fileName, $content)
     {
         $fileSystem = new Filesystem();
 
@@ -34,8 +34,8 @@ class LocalStorage implements StorageInterface
             throw new IOException("An error occurred while creating your directory at " . $e->getPath());
         }
 
-        $path = $this->basePath . $path;
-        $file = fopen($path, "w");
+        $fileName = $this->basePath . $fileName;
+        $file = fopen($fileName, "w");
         fputs($file, $content);
         fclose($file);
     }

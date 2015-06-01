@@ -8,6 +8,7 @@ use Shepard\Storage\LocalStorage;
 use Shepard\Storage\StorageInterface;
 use Shepard\Style\Style;
 use Shepard\Tests\Entity\ExampleEntityProvider;
+use Symfony\Component\Stopwatch\Stopwatch;
 
 class PDFGeneratorTest extends \PHPUnit_Framework_TestCase
 {
@@ -148,6 +149,45 @@ class PDFGeneratorTest extends \PHPUnit_Framework_TestCase
 
         $userList = ExampleEntityProvider::generate(500, 20, 50);
         $generator->draw($userList, "500EntitiesSFDP");
+
+        $this->assertTrue(true);
+    }
+
+    public function testGenerationExecutableTimes()
+    {
+        $generator = [];
+        $generatorExecutables = ["circo", "dot", "twopi", "neato", "fdp", "sfdp"];
+
+        foreach ($generatorExecutables as $generatorExecutable) {
+            $generator[$generatorExecutable] =
+                new PDFGenerator(new LocalStorage(
+                    "/tmp/Shepard/GraphGenerator/Draw Tests/Pdf/StopwatchTests/"),
+                    new Style($generatorExecutable)
+                );
+        }
+
+        $userList = ExampleEntityProvider::generate(200, 3, 50);
+
+        $stopwatch = new Stopwatch();
+        $stopwatch->start('timer');
+
+        foreach ($generatorExecutables as $generatorExecutable) {
+            $generator[$generatorExecutable]->draw($userList, $generatorExecutable);
+            $stopwatch->lap('timer');
+        }
+
+        $event = $stopwatch->stop('timer');
+        $periods = $event->getPeriods();
+
+        $results = "Generating PDF files" . PHP_EOL . PHP_EOL;
+        $i = 0;
+        foreach ($generatorExecutables as $generatorExecutable) {
+            $results .= $generatorExecutable ." - ". $periods[$i++]->getDuration() . " ms" . PHP_EOL;
+        }
+
+        $file = fopen('tests/stopwatch_pdf_results.txt', "w");
+        fputs($file, $results);
+        fclose($file);
 
         $this->assertTrue(true);
     }

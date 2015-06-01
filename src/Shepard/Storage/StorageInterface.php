@@ -6,7 +6,7 @@ interface StorageInterface
 {
     /**
      * @param string $content
-     * @param string $path
+     * @param string $fileName
      */
-    public function storeContent($path, $content);
+    public function storeContent($fileName, $content);
 }

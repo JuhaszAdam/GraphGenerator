@@ -40,7 +40,7 @@ class S3Storage implements StorageInterface
     /**
      * @inheritdoc
      */
-    public function storeContent($path, $content)
+    public function storeContent($fileName, $content)
     {
         $this->client->upload($this->bucket, $this->keyname, $content);
     }
