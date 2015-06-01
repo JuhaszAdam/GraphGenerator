@@ -2,6 +2,7 @@
 
 namespace Shepard\Storage;
 
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -30,7 +31,7 @@ class LocalStorage implements StorageInterface
         try {
             $fileSystem->mkdir($this->basePath, 0755, true);
         } catch (IOExceptionInterface $e) {
-            echo "An error occurred while creating your directory at " . $e->getPath();
+            throw new IOException("An error occurred while creating your directory at " . $e->getPath());
         }
 
         $path = $this->basePath . $path;
