@@ -182,10 +182,66 @@ class PDFGeneratorTest extends \PHPUnit_Framework_TestCase
         $results = "Generating PDF files" . PHP_EOL . PHP_EOL;
         $i = 0;
         foreach ($generatorExecutables as $generatorExecutable) {
-            $results .= $generatorExecutable ." - ". $periods[$i++]->getDuration() . " ms" . PHP_EOL;
+            $results .= $generatorExecutable . " - " . $periods[$i++]->getDuration() . " ms" . PHP_EOL;
         }
 
         $file = fopen('tests/stopwatch_pdf_results.txt', "w");
+        fputs($file, $results);
+        fclose($file);
+
+        $this->assertTrue(true);
+    }
+
+    public function testGenerationSplineTimes()
+    {
+        $generator = [];
+        $generatorSplines = ["false", "true", "ortho", "scalexy", "prism", "compress", "vpsc", "voronoi"];
+
+        foreach ($generatorSplines as $spline) {
+            $generator[$spline] =
+                new PDFGenerator(new LocalStorage(
+                    "/tmp/Shepard/GraphGenerator/Draw Tests/Pdf/StopwatchTests2/"),
+                    new Style("sfdp",
+                        [
+                            'rankdir=TB',
+                            'size="8,5"',
+                            'bgcolor="white"',
+                            'labelloc = "top"',
+                            'labeljust = "left"',
+                            'fontsize=25',
+                            'overlap="' . $spline . '"'
+                        ],
+                        [
+                            "shape = record",
+                            "penwidth = 2.0",
+                            "color = black",
+                            "style = filled",
+                            "fillcolor = white"
+                        ]
+                    )
+                );
+        }
+
+        $userList = ExampleEntityProvider::generate(200, 3, 50);
+
+        $stopwatch = new Stopwatch();
+        $stopwatch->start('timer');
+
+        foreach ($generatorSplines as $spline) {
+            $generator[$spline]->draw($userList, $spline);
+            $stopwatch->lap('timer');
+        }
+
+        $event = $stopwatch->stop('timer');
+        $periods = $event->getPeriods();
+
+        $results = "Generating PDF files" . PHP_EOL . PHP_EOL;
+        $i = 0;
+        foreach ($generatorSplines as $spline) {
+            $results .= $spline . " - " . $periods[$i++]->getDuration() . " ms" . PHP_EOL;
+        }
+
+        $file = fopen('tests/stopwatch_pdf_spline_results.txt', "w");
         fputs($file, $results);
         fclose($file);
 
