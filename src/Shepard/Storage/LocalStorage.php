@@ -25,7 +25,9 @@ class LocalStorage implements StorageInterface
     public function storeContent($path, $content)
     {
         if (!is_dir($this->basePath)) {
-            (new Process(mkdir($this->basePath, 0755, true)))->run();
+            if (!mkdir($this->basePath, 0755, true)) {
+                throw new \Exception("Couldn't create the target directory: " . $this->basePath);
+            }
         }
 
         $path = $this->basePath . $path;

@@ -19,7 +19,7 @@
   "require": {
     "php": ">=5.5",
     "symfony/process": "dev-master",
-    "aws/aws-sdk-php": "2.*"
+    "aws/aws-sdk-php": "3.0.2"
   },
   "require-dev": {
     "phpunit/phpunit": "~4.6"

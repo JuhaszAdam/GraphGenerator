@@ -17,12 +17,22 @@ class S3Storage implements StorageInterface
     private $keyname;
 
     /**
-     * @param string $bucket
-     * @param string $keyname
+     * @var S3Client $client
      */
-    public function __construct($bucket = "",
-                                $keyname = "")
+    private $client;
+
+    /**
+     * @param S3Client $client
+     * @param string   $bucket
+     * @param string   $keyname
+     */
+    public function __construct(
+        S3Client $client,
+        $bucket = "",
+        $keyname = ""
+    )
     {
+        $this->client = $client;
         $this->bucket = $bucket;
         $this->keyname = $keyname;
     }
@@ -32,7 +42,7 @@ class S3Storage implements StorageInterface
      */
     public function storeContent($path, $content)
     {
-        $s3Storage = S3Client::factory();
+        $s3Storage = $this->client->factory();
 
         $s3Storage->putObject([
             'Bucket'       => $this->bucket,
