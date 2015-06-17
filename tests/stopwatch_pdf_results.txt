@@ -1,0 +1,8 @@
+Generating PDF files
+
+circo - 64 ms
+dot - 57 ms
+twopi - 59 ms
+neato - 106 ms
+fdp - 3195 ms
+sfdp - 91 ms

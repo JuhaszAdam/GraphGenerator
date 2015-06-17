@@ -1,0 +1,10 @@
+Generating PDF files
+
+false - 269 ms
+true - 112 ms
+ortho - 194 ms
+scalexy - 109 ms
+prism - 269 ms
+compress - 103 ms
+vpsc - 103 ms
+voronoi - 354 ms
