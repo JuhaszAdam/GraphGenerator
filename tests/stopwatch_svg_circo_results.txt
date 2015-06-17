@@ -1,12 +1,12 @@
 Generating Circo files
 
-100 entities: 133 ms
-200 entities: 648 ms
-300 entities: 680 ms
-400 entities: 919 ms
-500 entities: 1079 ms
-600 entities: 1612 ms
-700 entities: 1508 ms
-800 entities: 1874 ms
-900 entities: 2126 ms
-1000 entities: 2354 ms
+100 entities: 263 ms
+200 entities: 472 ms
+300 entities: 892 ms
+400 entities: 885 ms
+500 entities: 1284 ms
+600 entities: 1659 ms
+700 entities: 1568 ms
+800 entities: 2145 ms
+900 entities: 2265 ms
+1000 entities: 2872 ms
